@@ -1,20 +1,30 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
+  standalone: true,
+  imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
-  standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
-export class LoginPage implements OnInit {
+export class LoginPage {
+  email: string = '';
+  senha: string = '';
 
-  constructor() { }
+  constructor(private router: Router) { }
+  login() {
+    if (this.email && this.senha) {
+      const tipoUsuario = this.email.includes('entidade') ? 'entidade' : 'voluntario';
 
-  ngOnInit() {
+      localStorage.setItem('usuario', JSON.stringify({ tipo: tipoUsuario }));
+
+      this.router.navigate(['/oportunidades']);
+    } else {
+      alert('Preencha os campos corretamente!');
+    }
   }
-
 }

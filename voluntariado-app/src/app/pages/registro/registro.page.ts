@@ -1,20 +1,32 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-registro',
+  standalone: true,
+  imports: [IonicModule, CommonModule, FormsModule],
   templateUrl: './registro.page.html',
   styleUrls: ['./registro.page.scss'],
-  standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
-export class RegistroPage implements OnInit {
+export class RegistroPage {
+  tipoRegistro: string = 'voluntario';
+  nome: string = '';
+  email: string = '';
+  telefone: string = '';
+  cnpj: string = '';
 
-  constructor() { }
+  cadastrar() {
+    console.log('Tipo:', this.tipoRegistro);
+    console.log('Nome:', this.nome);
+    console.log('Email:', this.email);
+    console.log('Telefone:', this.telefone);
 
-  ngOnInit() {
+    if (this.tipoRegistro === 'entidade') {
+      console.log('CNPJ:', this.cnpj);
+    }
+
+    alert('Cadastro realizado com sucesso!');
   }
-
 }

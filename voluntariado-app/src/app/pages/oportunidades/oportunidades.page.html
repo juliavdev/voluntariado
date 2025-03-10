@@ -1,13 +1,32 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>oportunidades</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Oportunidades</ion-title>
+    <ion-buttons slot="end" *ngIf="tipoUsuario === 'entidade'">
+      <ion-button (click)="novaOportunidade()">
+        <ion-icon name="add-circle-outline"></ion-icon>
+        Novo
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">oportunidades</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-list *ngIf="oportunidades.length > 0; else emptyState">
+    <ion-item *ngFor="let oportunidade of oportunidades">
+      <ion-label>
+        <h2>{{ oportunidade.titulo }}</h2>
+        <p>{{ oportunidade.descricao }}</p>
+        <p><strong>Data:</strong> {{ oportunidade.data }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #emptyState>
+    <div class="empty-container">
+      <h3>Nenhuma oportunidade disponível</h3>
+    </div>
+  </ng-template>
 </ion-content>
