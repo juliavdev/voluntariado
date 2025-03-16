@@ -140,25 +140,69 @@ app.post('/criaUsuario', async (req, res) => {
 
 /**
  * @swagger
- * /oportunidades:
+ * /oportunidadesDisponiveis:
  *   get:
- *     summary: Retorna a lista de oportunidades
+ *     summary: Lista oportunidades de voluntariado disponíveis
+ *     description: Retorna uma lista de oportunidades que ainda possuem vagas disponíveis e nas quais o usuário autenticado ainda não está inscrito.
  *     tags: [Oportunidades]
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de oportunidades retornada com sucesso
+ *         description: Lista de oportunidades retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: ID da oportunidade.
+ *                   titulo:
+ *                     type: string
+ *                     description: Título da oportunidade.
+ *                   descricao:
+ *                     type: string
+ *                     description: Descrição detalhada da oportunidade.
+ *                   endereco:
+ *                     type: string
+ *                     description: Endereço da oportunidade.
+ *                   vagasRestantes:
+ *                     type: integer
+ *                     description: Número de vagas ainda disponíveis.
+ *                   entidade:
+ *                     type: string
+ *                     description: Nome da entidade responsável pela oportunidade.
+ *       401:
+ *         description: Token não fornecido ou inválido.
  *       500:
- *         description: Erro de servidor 
+ *         description: Erro de servidor.
  */
-app.get('/oportunidades', async (req, res) => {
+app.get('/oportunidadesDisponiveis', autenticarToken, async (req, res) => {
+    const usuarioId = req.usuario.id;
     try {
         const oportunidades = await query(`
-            SELECT op.id, op.titulo, op.descricao, 
-                   us.nome AS entidade 
+            SELECT op.id, op.titulo, op.descricao, op.endereco,
+                (op.max_voluntarios - COALESCE(u.total_inscritos, 0)) AS vagasRestantes,
+                us.nome AS entidade
             FROM oportunidades op
-            INNER JOIN usuarios us ON oportunidades.entidade_id = usuarios.id`);
+            INNER JOIN usuarios us ON op.entidade_id = us.id
+            LEFT JOIN (
+                SELECT id_oportunidade, COUNT(*) AS total_inscritos
+                FROM usuariosxoportunidades
+                GROUP BY id_oportunidade
+            ) u ON op.id = u.id_oportunidade
+            WHERE (op.max_voluntarios - COALESCE(u.total_inscritos, 0)) > 0
+            AND NOT EXISTS (
+                SELECT 1 
+                FROM usuariosxoportunidades ux
+                WHERE ux.id_oportunidade = op.id 
+                AND ux.id_usuario = ?);`,
+                [usuarioId]);
         
-        res.json(oportunidades);
+        res.status(200).json(oportunidades);
     } catch (error) {
         res.status(500).json({ error: 'Erro de servidor' });
     }
@@ -183,6 +227,8 @@ app.get('/oportunidades', async (req, res) => {
  *                 type: string
  *               descricao:
  *                 type: string
+ *               endereco:
+ *                 type: string
  *               quantidadeMaximaVoluntarios:
  *                 type: integer
  *               dataAcao:
@@ -198,7 +244,7 @@ app.get('/oportunidades', async (req, res) => {
  *         description: Erro de servidor 
  */
 app.post('/criaOportunidade', autenticarToken, async (req, res) => {
-    const { titulo, descricao, quantidadeMaximaVoluntarios, dataAcao} = req.body;
+    const { titulo, descricao, endereco, quantidadeMaximaVoluntarios, dataAcao} = req.body;
     const entidadeId = req.usuario.id;
 
     try {
@@ -208,8 +254,8 @@ app.post('/criaOportunidade', autenticarToken, async (req, res) => {
             return res.status(403).json({ error: 'Apenas entidades podem criar oportunidades!' });
         }
 
-        await query('INSERT INTO oportunidades (titulo, descricao, max_voluntarios, data, entidade_id) VALUES (?, ?, ?, ?, ?)', 
-            [titulo, descricao, quantidadeMaximaVoluntarios, dataAcao, entidadeId]);
+        await query('INSERT INTO oportunidades (titulo, descricao, endereco, max_voluntarios, data, entidade_id) VALUES (?, ?, ?, ?, ?, ?)', 
+            [titulo, descricao, endereco, quantidadeMaximaVoluntarios, dataAcao, entidadeId]);
 
         res.status(201).json({ message: 'Oportunidade criada com sucesso!' });
     } catch (error) {
@@ -291,6 +337,7 @@ app.post('/deletaOportunidade', autenticarToken, async (req, res) => {
  *               - idOportunidade
  *               - titulo
  *               - descricao
+ *               - endereco
  *               - quantidadeMaximaVoluntarios
  *               - dataAcao
  *             properties:
@@ -299,6 +346,8 @@ app.post('/deletaOportunidade', autenticarToken, async (req, res) => {
  *               titulo:
  *                 type: string
  *               descricao:
+ *                 type: string
+ *               endereco:
  *                 type: string
  *               quantidadeMaximaVoluntarios:
  *                 type: integer
@@ -319,7 +368,7 @@ app.post('/deletaOportunidade', autenticarToken, async (req, res) => {
  *         description: Erro de servidor
  */
 app.post('/atualizaOportunidade', autenticarToken, async (req, res) => {
-    const {idOportunidade, titulo, descricao, quantidadeMaximaVoluntarios, dataAcao} = req.body;
+    const {idOportunidade, titulo, descricao, endereco, quantidadeMaximaVoluntarios, dataAcao} = req.body;
     const entidadeId = req.usuario.id;
 
     try {
@@ -330,8 +379,8 @@ app.post('/atualizaOportunidade', autenticarToken, async (req, res) => {
             res.status(404).json({ message: 'Oportunidade não encontrada!' });
         }
 
-        await query('UPDATE oportunidades SET titulo = ?, descricao = ?, max_voluntarios = ?, data = ? WHERE id = ? and entidade_id = ?', 
-            [titulo, descricao, quantidadeMaximaVoluntarios, dataAcao, idOportunidade, entidadeId]);
+        await query('UPDATE oportunidades SET titulo = ?, descricao = ?, endereco = ?, max_voluntarios = ?, data = ? WHERE id = ? and entidade_id = ?', 
+            [titulo, descricao, endereco, quantidadeMaximaVoluntarios, dataAcao, idOportunidade, entidadeId]);
         res.status(200).json({ message: 'Oportunidade atualizada com sucesso!' });
 
 
@@ -340,7 +389,139 @@ app.post('/atualizaOportunidade', autenticarToken, async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /inscreveOportunidade:
+ *   post:
+ *     summary: Inscreve um voluntário em uma oportunidade de voluntariado
+ *     description: Apenas voluntários podem se inscrever em oportunidades de voluntariado.
+ *     tags: [Oportunidades]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - idOportunidade
+ *             properties:
+ *               idOportunidade:
+ *                 type: integer
+ *                 description: ID da oportunidade na qual o voluntário deseja se inscrever.
+ *     responses:
+ *       200:
+ *         description: Inscrição concluída com sucesso.
+ *       403:
+ *         description: Apenas voluntários podem se inscrever em oportunidades.
+ *       500:
+ *         description: Erro de servidor.
+ */
+app.post('/inscreveOportunidade', autenticarToken, async (req, res) => {
+    const {idOportunidade} = req.body;
+    const usuarioId = req.usuario.id;
+    const usuarioTipo = req.usuario.tipo;
 
+    try {
+
+        if (usuarioTipo === 'entidade') {
+            res.status(403).json({ message: 'Apenas voluntários podem se inscrever em oportunidades!' });
+        }
+
+        await query('INSERT INTO usuariosxoportunidades (id_usuario, id_oportunidade) values (?,?)', 
+            [usuarioId, idOportunidade]);
+        res.status(200).json({ message: 'Inscricao concluída com sucesso!' });
+
+    } catch (error) {
+        res.status(500).json({ error: 'Erro de servidor' });
+    }
+});
+
+/**
+ * @swagger
+ * /minhasOportunidades:
+ *   get:
+ *     summary: Lista oportunidades cadastradas pela entidade ou oportunidades em que o voluntário está inscrito.
+ *     description: Retorna uma lista de oportunidades cadastradas pela entidade autenticada (se for do tipo entidade) ou uma lista de oportunidades em que o voluntário autenticado está inscrito.
+ *     tags: [Oportunidades]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de oportunidades retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: ID da oportunidade.
+ *                   titulo:
+ *                     type: string
+ *                     description: Título da oportunidade.
+ *                   descricao:
+ *                     type: string
+ *                     description: Descrição detalhada da oportunidade.
+ *                   endereco:
+ *                     type: string
+ *                     description: Endereço da oportunidade.
+ *                   quantidadeMaximaVoluntarios:
+ *                     type: integer
+ *                     description: Quantidade máxima de voluntários permitidos na oportunidade (apenas para entidades).
+ *                   vagasRestantes:
+ *                     type: integer
+ *                     description: Número de vagas ainda disponíveis para novos voluntários (apenas para entidades).
+ *                   data:
+ *                     type: string
+ *                     format: date
+ *                     description: Data da oportunidade (apenas para voluntários).
+ *                   entidade:
+ *                     type: string
+ *                     description: Nome da entidade responsável pela oportunidade.
+ *       401:
+ *         description: Token não fornecido ou inválido.
+ *       500:
+ *         description: Erro de servidor.
+ */
+app.get('/minhasOportunidades', autenticarToken, async (req, res) => {
+    const usuarioId = req.usuario.id;
+    const usuarioTipo = req.usuario.tipo;
+    let oportunidades = [];
+    try {
+        if(usuarioTipo === 'entidade') {
+            oportunidades = await query(`
+                SELECT op.id, op.titulo, op.descricao, op.endereco, op.max_voluntarios as quantidadeMaximaVoluntarios,
+                    (op.max_voluntarios - COALESCE(u.total_inscritos, 0)) AS vagasRestantes
+                FROM oportunidades op
+                INNER JOIN usuarios us ON op.entidade_id = us.id
+                LEFT JOIN (
+                    SELECT id_oportunidade, COUNT(*) AS total_inscritos
+                    FROM usuariosxoportunidades
+                    GROUP BY id_oportunidade
+                ) u ON op.id = u.id_oportunidade
+                WHERE op.entidade_id = ?;`,
+                    [usuarioId]);
+        } else {
+            oportunidades = await query(`
+                SELECT op.id, op.titulo, op.descricao, op.endereco, op.data, us.nome as entidade
+                FROM oportunidades op
+                INNER JOIN usuarios us ON op.entidade_id = us.id
+                WHERE EXISTS (SELECT 1 
+                                FROM usuariosxoportunidades ux
+                                WHERE ux.id_oportunidade = op.id 
+                                AND ux.id_usuario = ?);`,
+                    [usuarioId]);
+        }
+
+        res.status(200).json(oportunidades);
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
+});
 
 // 🔹 Iniciar o Servidor
 app.listen(3000, () => {
