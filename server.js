@@ -6,8 +6,6 @@ const cors = require('cors');
 const { query } = require('./db');
 const setupSwagger = require('./swagger');
 const autenticarToken = require('./auth');
-const setupSwagger = require('./swagger');
-const autenticarToken = require('./auth');
 
 const app = express();
 app.use(express.json());
@@ -16,56 +14,6 @@ app.use(cors());
 setupSwagger(app); // 🔹 Configura Swagger
 
 const JWT_SECRET = process.env.JWT_SECRET;
-
-
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     BearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * tags:
- *   - name: Usuários
- *     description: Gerenciamento de usuários
- *   - name: Oportunidades
- *     description: Gerenciamento das açoes voluntárias
- */
-
-/**
- * @swagger
- * /login:
- *   post:
- *     summary: Autentica um usuário e retorna um token
- *     tags: [Usuários]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               senha:
- *                 type: string
- *     responses:
- *       200:
- *         description: Usuário autenticado com sucesso
- *       401:
- *         description: Credenciais inválidas
- *       500:
- *         description: Erro de servidor 
- */
-setupSwagger(app); // 🔹 Configura Swagger
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
 
 /**
  * @swagger
@@ -299,7 +247,6 @@ app.post('/criaOportunidade', autenticarToken, async (req, res) => {
     const entidadeId = req.usuario.id;
 
     try {
-        const entidade = await query('SELECT * FROM usuarios WHERE id = ? AND tipo = "entidade"', [entidadeId]);
         const entidade = await query('SELECT * FROM usuarios WHERE id = ? AND tipo = "entidade"', [entidadeId]);
         
         if (entidade.length === 0) {
