@@ -19,8 +19,27 @@
       <ion-label>
         <h2>{{ oportunidade.titulo }}</h2>
         <p>{{ oportunidade.descricao }}</p>
-        <p><strong>Data:</strong> {{ oportunidade.data }}</p>
+        <p>
+          <strong>Data:</strong> {{ oportunidade.data | date:'dd/MM/yyyy' }}
+        </p>
       </ion-label>
+
+      <ion-button
+        *ngIf="tipoUsuario === 'voluntario'"
+        [disabled]="oportunidade.inscrito"
+        (click)="inscrever(oportunidade)"
+        [color]="oportunidade.inscrito ? 'medium' : 'primary'"
+      >
+        <ion-icon
+          *ngIf="!oportunidade.inscrito"
+          name="log-in-outline"
+        ></ion-icon>
+        <ion-icon
+          *ngIf="oportunidade.inscrito"
+          name="checkmark-circle-outline"
+        ></ion-icon>
+        {{ oportunidade.inscrito ? 'Inscrito' : 'Inscrever-se' }}
+      </ion-button>
     </ion-item>
   </ion-list>
 

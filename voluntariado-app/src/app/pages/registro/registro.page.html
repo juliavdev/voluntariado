@@ -1,50 +1,86 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Cadastro</ion-title>
+    <ion-title>Cadastro de Usuário</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title
-        >Cadastro de {{ tipoRegistro === 'voluntario' ? 'Voluntário' :
-        'Entidade' }}</ion-card-title
+<ion-content>
+  <form (ngSubmit)="cadastrar()">
+    <ion-item>
+      <ion-label position="floating">Nome</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="nome"
+        name="nome"
+        [ngModelOptions]="{standalone: true}"
+        required
+      ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Email</ion-label>
+      <ion-input
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        [ngModelOptions]="{standalone: true}"
+        required
+      ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Telefone</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="telefone"
+        name="telefone"
+        [ngModelOptions]="{standalone: true}"
+        required
+      ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Senha</ion-label>
+      <ion-input
+        type="password"
+        [(ngModel)]="senha"
+        name="senha"
+        [ngModelOptions]="{standalone: true}"
+        required
+      ></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Tipo de Usuário</ion-label>
+      <ion-segment
+        [(ngModel)]="tipoRegistro"
+        [ngModelOptions]="{standalone: true}"
       >
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-label>Tipo</ion-label>
-        <ion-select [(ngModel)]="tipoRegistro">
-          <ion-select-option value="voluntario">Voluntário</ion-select-option>
-          <ion-select-option value="entidade">Entidade</ion-select-option>
-        </ion-select>
-      </ion-item>
+        <ion-segment-button value="voluntario"> Voluntário </ion-segment-button>
+        <ion-segment-button value="entidade"> Entidade </ion-segment-button>
+      </ion-segment>
+    </ion-item>
 
-      <ion-item>
-        <ion-label position="floating">Nome</ion-label>
-        <ion-input [(ngModel)]="nome"></ion-input>
-      </ion-item>
+    <ion-item *ngIf="tipoRegistro === 'entidade'">
+      <ion-label position="floating">CNPJ</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="cnpj"
+        name="cnpj"
+        [ngModelOptions]="{standalone: true}"
+      ></ion-input>
+    </ion-item>
 
-      <ion-item>
-        <ion-label position="floating">Email</ion-label>
-        <ion-input [(ngModel)]="email" type="email"></ion-input>
-      </ion-item>
+    <ion-item *ngIf="tipoRegistro === 'voluntario'">
+      <ion-label position="floating">CPF</ion-label>
+      <ion-input
+        type="text"
+        [(ngModel)]="cpf"
+        name="cpf"
+        [ngModelOptions]="{standalone: true}"
+      ></ion-input>
+    </ion-item>
 
-      <ion-item>
-        <ion-label position="floating">Telefone</ion-label>
-        <ion-input [(ngModel)]="telefone" type="tel"></ion-input>
-      </ion-item>
-
-      <ion-item *ngIf="tipoRegistro === 'entidade'">
-        <ion-label position="floating">CNPJ</ion-label>
-        <ion-input [(ngModel)]="cnpj"></ion-input>
-      </ion-item>
-
-      <ion-button expand="full" (click)="cadastrar()">Cadastrar</ion-button>
-    </ion-card-content>
-  </ion-card>
+    <ion-button expand="full" type="submit">Cadastrar</ion-button>
+  </form>
 </ion-content>

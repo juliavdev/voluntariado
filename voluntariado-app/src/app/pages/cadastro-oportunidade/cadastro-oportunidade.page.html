@@ -14,13 +14,31 @@
     </ion-card-header>
     <ion-card-content>
       <ion-item>
-        <ion-label position="floating">Nome</ion-label>
+        <ion-label position="floating">Título</ion-label>
         <ion-input [(ngModel)]="titulo"></ion-input>
       </ion-item>
 
       <ion-item>
-        <ion-label position="floating">Data</ion-label>
-        <ion-input [(ngModel)]="data" type="date"></ion-input>
+        <ion-label position="floating">Descrição</ion-label>
+        <ion-textarea [(ngModel)]="descricao"></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Endereço</ion-label>
+        <ion-input [(ngModel)]="endereco"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Qtd. Máxima de Voluntários</ion-label>
+        <ion-input
+          [(ngModel)]="quantidadeMaximaVoluntarios"
+          type="number"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Data da Ação</ion-label>
+        <ion-input [(ngModel)]="dataAcao" type="date"></ion-input>
       </ion-item>
 
       <ion-button expand="full" (click)="cadastrar()">Cadastrar</ion-button>

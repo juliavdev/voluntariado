@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ApiService } from 'src/app/services/api.service';
 
 @Component({
   selector: 'app-login',
@@ -15,14 +16,30 @@ export class LoginPage {
   email: string = '';
   senha: string = '';
 
-  constructor(private router: Router) { }
-  login() {
+  constructor(
+    private router: Router,
+    private apiService: ApiService,
+    private toastCtrl: ToastController
+  ) { }
+
+  async login() {
     if (this.email && this.senha) {
-      const tipoUsuario = this.email.includes('entidade') ? 'entidade' : 'voluntario';
+      try {
+        const response = await this.apiService.login({ email: this.email, senha: this.senha });
 
-      localStorage.setItem('usuario', JSON.stringify({ tipo: tipoUsuario }));
+        const { token, tipo } = response.data;
+        localStorage.setItem('usuario', JSON.stringify({ tipo, token }));
 
-      this.router.navigate(['/oportunidades']);
+        this.router.navigate(['/oportunidades']);
+      } catch (error) {
+        console.error('Erro ao fazer login:', error);
+        const toast = await this.toastCtrl.create({
+          message: 'Credenciais inválidas! Tente novamente.',
+          duration: 2000,
+          color: 'danger',
+        });
+        await toast.present();
+      }
     } else {
       alert('Preencha os campos corretamente!');
     }

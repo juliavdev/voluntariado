@@ -8,11 +8,14 @@
       </ion-header>
       <ion-content>
         <ion-list>
-          <ion-item routerLink="/registro" routerDirection="root">
-            Registrar entidade ou voluntário
+          <ion-item button (click)="navigateToPage('registro')">
+            Cadastrar usuário
           </ion-item>
-          <ion-item routerLink="/oportunidades" routerDirection="root">
-            Verificar oportunidades
+          <ion-item button (click)="navigateToProtectedPage('oportunidades')">
+            Oportunidades
+          </ion-item>
+          <ion-item button (click)="logoff()">
+            <ion-label>Logoff</ion-label>
           </ion-item>
         </ion-list>
       </ion-content>
