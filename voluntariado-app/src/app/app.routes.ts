@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
+import { AutenticadoGuard } from './guards/autenticado.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'home',
     pathMatch: 'full',
   },
   {
@@ -16,14 +17,7 @@ export const routes: Routes = [
   },
   {
     path: 'home',
+    canMatch: [AutenticadoGuard],
     loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage)
-  },
-  {
-    path: 'oportunidades',
-    loadComponent: () => import('./pages/oportunidades/oportunidades.page').then(m => m.OportunidadesPage)
-  },
-  {
-    path: 'cadastro-oportunidade',
-    loadComponent: () => import('./pages/cadastro-oportunidade/cadastro-oportunidade.page').then(m => m.CadastroOportunidadePage)
-  },
+  }
 ];

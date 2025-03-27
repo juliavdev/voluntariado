@@ -9,6 +9,7 @@ import { ApiService } from 'src/app/services/api.service';
   selector: 'app-login',
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule],
+  providers: [ApiService],
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
 })
@@ -30,7 +31,8 @@ export class LoginPage {
         const { token, tipo } = response.data;
         localStorage.setItem('usuario', JSON.stringify({ tipo, token }));
 
-        this.router.navigate(['/oportunidades']);
+        this.router.navigate(['/home']);
+        
       } catch (error) {
         console.error('Erro ao fazer login:', error);
         const toast = await this.toastCtrl.create({
@@ -43,5 +45,9 @@ export class LoginPage {
     } else {
       alert('Preencha os campos corretamente!');
     }
+  }
+
+  criarConta() {
+    this.router.navigate(['/registro']);
   }
 }

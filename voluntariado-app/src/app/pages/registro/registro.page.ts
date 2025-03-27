@@ -10,6 +10,7 @@ import { ToastController } from '@ionic/angular';
   selector: 'app-registro',
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule],
+  providers: [ApiService],
   templateUrl: './registro.page.html',
   styleUrls: ['./registro.page.scss'],
 })
@@ -52,8 +53,8 @@ export class RegistroPage {
 
       const { token, tipo } = response.data;
       localStorage.setItem('usuario', JSON.stringify({ tipo, token }));
-
-      this.router.navigate(['/oportunidades']);
+      
+      this.router.navigate(['/login']);
     } catch (error) {
       console.error('Erro ao realizar o cadastro:', error);
 
@@ -64,5 +65,9 @@ export class RegistroPage {
       });
       await toast.present();
     }
+  }
+
+  irParaLogin() {
+    this.router.navigate(['/login']);
   }
 }

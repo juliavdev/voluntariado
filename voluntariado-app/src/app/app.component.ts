@@ -12,35 +12,5 @@ import { ApiService } from './services/api.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  constructor(
-    private router: Router,
-    private apiService: ApiService,
-    private toastCtrl: ToastController
-  ) { }
-
-  async navigateToProtectedPage(page: string) {
-    const usuario = localStorage.getItem('usuario');
-
-    if (!usuario) {
-      const toast = await this.toastCtrl.create({
-        message: 'Essa página só pode ser acessada se você estiver logado.',
-        duration: 2000,
-        color: 'danger',
-      });
-      await toast.present();
-
-      this.router.navigate(['/login']);
-    } else {
-      this.router.navigate([`/${page}`]);
-    }
-  }
-
-  navigateToPage(page: string) {
-    this.router.navigate([`/${page}`]);
-  }
-
-  logoff() {
-    this.apiService.logout();
-    this.router.navigate(['/login']);
-  }
+  constructor() { }
 }

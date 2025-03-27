@@ -1,16 +1,7 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/oportunidades"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Nova Oportunidade</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content>
   <ion-card>
     <ion-card-header>
-      <ion-card-title>Cadastro de Oportunidade</ion-card-title>
+      <ion-card-title>{{ oportunidade ? "Editar" : "Nova" }} Oportunidade</ion-card-title>
     </ion-card-header>
     <ion-card-content>
       <ion-item>
@@ -40,8 +31,9 @@
         <ion-label position="floating">Data da Ação</ion-label>
         <ion-input [(ngModel)]="dataAcao" type="date"></ion-input>
       </ion-item>
-
-      <ion-button expand="full" (click)="cadastrar()">Cadastrar</ion-button>
+      
+      <ion-button expand="full" (click)="enviar()">{{ oportunidade ? "Atualizar" : "Cadastrar" }}</ion-button>
+      <ion-button expand="full" (click)="fecharModal()">Cancelar</ion-button>
     </ion-card-content>
   </ion-card>
 </ion-content>

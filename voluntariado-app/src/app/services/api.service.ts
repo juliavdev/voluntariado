@@ -40,6 +40,10 @@ export class ApiService {
         return axios.post(`${this.API_URL}/atualizaOportunidade`, oportunidade);
     }
 
+    async deletaOportunidade(oportunidade: any) {
+        return axios.post(`${this.API_URL}/deletaOportunidade`, oportunidade);
+    }
+
     async inscreveOportunidade(oportunidade: any) {
         return axios.post(`${this.API_URL}/inscreveOportunidade`, oportunidade);
     }
@@ -59,10 +63,5 @@ export class ApiService {
     getToken() {
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
         return usuario.token || '';
-    }
-
-    isAuthenticated() {
-        const token = this.getToken();
-        return token ? true : false;
     }
 }

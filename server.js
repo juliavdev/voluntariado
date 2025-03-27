@@ -83,7 +83,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
 /**
  * @swagger
  * /criaUsuario:
@@ -134,9 +133,6 @@ app.post('/criaUsuario', async (req, res) => {
     }
 });
 
-
-
-
 /**
  * @swagger
  * /oportunidadesDisponiveis:
@@ -183,7 +179,7 @@ app.get('/oportunidadesDisponiveis', autenticarToken, async (req, res) => {
     const usuarioId = req.usuario.id;
     try {
         const oportunidades = await query(`
-            SELECT op.id, op.titulo, op.descricao, op.endereco, op.data,
+            SELECT op.id, op.titulo, op.descricao, op.endereco, op.data, op.max_voluntarios as quantidadeMaximaVoluntarios,
                 (op.max_voluntarios - COALESCE(u.total_inscritos, 0)) AS vagasRestantes,
                 us.nome AS entidade,
                 EXISTS (
@@ -198,8 +194,7 @@ app.get('/oportunidadesDisponiveis', autenticarToken, async (req, res) => {
                 SELECT id_oportunidade, COUNT(*) AS total_inscritos
                 FROM usuariosxoportunidades
                 GROUP BY id_oportunidade
-            ) u ON op.id = u.id_oportunidade
-            WHERE (op.max_voluntarios - COALESCE(u.total_inscritos, 0)) > 0;`, [usuarioId]);
+            ) u ON op.id = u.id_oportunidade;`, [usuarioId]);
 
         res.status(200).json(oportunidades);
     } catch (error) {
@@ -255,8 +250,6 @@ app.post('/criaOportunidade', autenticarToken, async (req, res) => {
 
         await query('INSERT INTO oportunidades (titulo, descricao, endereco, max_voluntarios, data, entidade_id) VALUES (?, ?, ?, ?, ?, ?)', 
             [titulo, descricao, endereco, quantidadeMaximaVoluntarios, dataAcao, entidadeId]);
-        await query('INSERT INTO oportunidades (titulo, descricao, endereco, max_voluntarios, data, entidade_id) VALUES (?, ?, ?, ?, ?, ?)', 
-            [titulo, descricao, endereco, quantidadeMaximaVoluntarios, dataAcao, entidadeId]);
 
         res.status(201).json({ message: 'Oportunidade criada com sucesso!' });
     } catch (error) {
@@ -301,7 +294,6 @@ app.post('/deletaOportunidade', autenticarToken, async (req, res) => {
     const entidadeId = req.usuario.id;
 
     try {
-
         const existeOportunidade = await query('SELECT 1 FROM oportunidades WHERE id = ? AND entidade_id = ?', [idOportunidade, entidadeId]);
 
         if (existeOportunidade.length === 0) {
@@ -311,7 +303,6 @@ app.post('/deletaOportunidade', autenticarToken, async (req, res) => {
         await query('DELETE FROM oportunidades WHERE id = ? and entidade_id = ?', 
             [idOportunidade, entidadeId]);
         res.status(200).json({ message: 'Oportunidade deletada com sucesso!' });
-
 
     } catch (error) {
         res.status(500).json({ error: error });
@@ -373,7 +364,6 @@ app.post('/atualizaOportunidade', autenticarToken, async (req, res) => {
     const entidadeId = req.usuario.id;
 
     try {
-
         const existeOportunidade = await query('SELECT 1 FROM oportunidades WHERE id = ? AND entidade_id = ?', [idOportunidade, entidadeId]);
 
         if (existeOportunidade.length === 0) {
@@ -383,7 +373,6 @@ app.post('/atualizaOportunidade', autenticarToken, async (req, res) => {
         await query('UPDATE oportunidades SET titulo = ?, descricao = ?, endereco = ?, max_voluntarios = ?, data = ? WHERE id = ? and entidade_id = ?', 
             [titulo, descricao, endereco, quantidadeMaximaVoluntarios, dataAcao, idOportunidade, entidadeId]);
         res.status(200).json({ message: 'Oportunidade atualizada com sucesso!' });
-
 
     } catch (error) {
         res.status(500).json({ error: error });
@@ -435,8 +424,7 @@ app.post('/inscreveOportunidade', autenticarToken, async (req, res) => {
     } catch (error) {
         console.error('Erro ao executar query:', error);
         return res.status(500).json({ error: error.message });
-    }
-    
+    }  
 });
 
 /**
@@ -519,6 +507,7 @@ app.get('/minhasOportunidades', autenticarToken, async (req, res) => {
         }
 
         res.status(200).json(oportunidades);
+
     } catch (error) {
         res.status(500).json({ error: error });
     }

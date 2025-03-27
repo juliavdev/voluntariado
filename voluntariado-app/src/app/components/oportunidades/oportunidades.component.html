@@ -5,7 +5,7 @@
     </ion-buttons>
     <ion-title>Oportunidades</ion-title>
     <ion-buttons slot="end" *ngIf="tipoUsuario === 'entidade'">
-      <ion-button (click)="novaOportunidade()">
+      <ion-button (click)="alterarOportunidade()">
         <ion-icon name="add-circle-outline"></ion-icon>
         Novo
       </ion-button>
@@ -26,19 +26,37 @@
 
       <ion-button
         *ngIf="tipoUsuario === 'voluntario'"
-        [disabled]="oportunidade.inscrito"
+        [disabled]="oportunidade.inscrito || oportunidade.vagasRestantes == 0"
         (click)="inscrever(oportunidade)"
-        [color]="oportunidade.inscrito ? 'medium' : 'primary'"
+        [color]="oportunidade.vagasRestantes == 0 ? 'danger' : (oportunidade.inscrito ? 'medium' : 'primary')"
       >
         <ion-icon
-          *ngIf="!oportunidade.inscrito"
+          *ngIf="!oportunidade.inscrito && oportunidade.vagasRestantes > 0"
           name="log-in-outline"
+        ></ion-icon>
+        <ion-icon
+          *ngIf="!oportunidade.inscrito && oportunidade.vagasRestantes == 0"
+          name="close-circle-outline"
         ></ion-icon>
         <ion-icon
           *ngIf="oportunidade.inscrito"
           name="checkmark-circle-outline"
         ></ion-icon>
-        {{ oportunidade.inscrito ? 'Inscrito' : 'Inscrever-se' }}
+        {{ oportunidade.vagasRestantes == 0 ? 'Esgotado' : (oportunidade.inscrito ? 'Inscrito' : 'Inscrever-se') }}
+      </ion-button>
+
+      <ion-button
+        *ngIf="tipoUsuario === 'entidade'"
+        (click)="alterarOportunidade(oportunidade)"
+      >
+        <ion-icon name="create-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button
+        *ngIf="tipoUsuario === 'entidade'"
+        (click)="excluir(oportunidade.id)"
+      >
+        <ion-icon name="trash-outline"></ion-icon>
       </ion-button>
     </ion-item>
   </ion-list>
